@@ -28,7 +28,7 @@ use imessage_database::{
         url::URLMessage,
     },
     tables::{
-        attachment::Attachment,
+        attachment::{Attachment, MediaType},
         messages::{
             models::{AttachmentMeta, TextAttributes},
             Message,
@@ -61,6 +61,8 @@ struct JSONAttachment {
     filename: Option<String>,
     mime_type: Option<String>,
     total_bytes: i64,
+    path: Option<String>,
+    media_type: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -208,12 +210,34 @@ impl<'a> JSON<'a> {
             let message_attachments = Attachment::from_message(&self.config.db, message)
                 .map_err(RuntimeError::DatabaseError)?;
 
-            for attachment in message_attachments {
+            for mut attachment in message_attachments {
+                // Copy the file if requested
+                self.config
+                    .options
+                    .attachment_manager
+                    .handle_attachment(message, &mut attachment, self.config);
+
+                // Get the relative path for the attachment
+                let path = Some(self.config.message_attachment_path(&attachment));
+
+                // Get a string representation of the media type
+                let media_type = match attachment.mime_type() {
+                    MediaType::Image(t) => format!("image/{}", t),
+                    MediaType::Video(t) => format!("video/{}", t),
+                    MediaType::Audio(t) => format!("audio/{}", t),
+                    MediaType::Text(t) => format!("text/{}", t),
+                    MediaType::Application(t) => format!("application/{}", t),
+                    MediaType::Unknown => "unknown".to_string(),
+                    MediaType::Other(t) => t.to_string(),
+                };
+
                 attachments.push(JSONAttachment {
                     guid: attachment.rowid.to_string(),
                     filename: attachment.filename,
                     mime_type: attachment.mime_type,
                     total_bytes: attachment.total_bytes,
+                    path,
+                    media_type,
                 });
             }
         }
