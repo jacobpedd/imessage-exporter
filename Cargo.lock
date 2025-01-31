@@ -482,6 +482,8 @@ dependencies = [
  "imessage-database",
  "indicatif",
  "rusqlite",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -798,6 +800,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ryu"
+version = "1.0.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ea1a2d0a644769cc99faa24c3ad26b379b786fe7c36fd3c546254801650e6dd"
+
+[[package]]
 name = "scratch"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -821,6 +829,17 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.77",
+]
+
+[[package]]
+name = "serde_json"
+version = "1.0.109"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb0652c533506ad7a2e353cce269330d6afd8bdfb6d75e0ace5b35aacbd7b9e9"
+dependencies = [
+ "itoa",
+ "ryu",
+ "serde",
 ]
 
 [[package]]
